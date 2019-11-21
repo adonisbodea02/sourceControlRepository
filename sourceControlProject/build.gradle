@@ -1,8 +1,10 @@
 plugins {
     id 'java'
+    id 'com.palantir.git-version' version '0.12.2'
 }
 
-version '1.0-SNAPSHOT'
+group 'aspecte'
+version gitVersion()
 
 sourceCompatibility = 1.8
 
@@ -10,10 +12,12 @@ repositories {
     mavenCentral()
 }
 
+def details = versionDetails()
+println(details.gitHash)
+ant.replaceregexp(match:'private static final String versionHash = ".*";', replace: "private static final String versionHash = \"$details.gitHash\";", flags:'g', byline:true) {
+    fileset(dir: "$rootDir/src/main/java", includes: 'Main.java')
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
-
-version = rootProject.file('version.txt').text.trim()
-version = (version.toInteger() + 1).toString()
-rootProject.file('version.txt').write(version)
